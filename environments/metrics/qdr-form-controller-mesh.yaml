@@ -5,7 +5,7 @@
 
 
 resource_registry:
-  OS::TripleO::Services::MetricsQdr: ../../deployment/metrics/qdr-container-puppet.yaml
+  OS::TripleO::Services::MetricsQdr: ../../deployment/metrics/qdr-container-ansible.yaml
 
 
 parameter_defaults:
