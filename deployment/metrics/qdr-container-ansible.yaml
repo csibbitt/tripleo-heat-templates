@@ -270,6 +270,9 @@ outputs:
           - owner: qdrouterd:qdrouterd
             path: /var/lib/qdrouterd
             recurse: true
+          - owner: qdrouterd:qdrouterd
+            path: /var/log/qdrouterd
+            recurse: true
           - optional: true
             owner: qdrouterd:qdrouterd
             path: /etc/pki/tls/certs/metrics_qdr.crt
@@ -317,21 +320,6 @@ outputs:
                       - get_param: InternalTLSCAFile
                       - ro
                 - null
-#Can I use kolla permissions to do this instead?
-          metrics_qdr_init_logs:
-            command:
-            - /bin/bash
-            - -c
-            - chown -R qdrouterd:qdrouterd /var/log/qdrouterd
-            detach: false
-            image:
-              get_param: ContainerMetricsQdrImage
-            net: none
-            privileged: false
-            start_order: 0
-            user: root
-            volumes:
-            - /var/log/containers/metrics_qdr:/var/log/qdrouterd:z
 
       host_prep_tasks:
       - name: "Qdr host_prep_tasks tasks"
