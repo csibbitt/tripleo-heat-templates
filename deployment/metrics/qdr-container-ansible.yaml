@@ -284,6 +284,7 @@ outputs:
       # called here, and they get formatted with the rest of the yaml
       #########################################################################
       docker_config:
+# Why is this step_1 and not step_3 or so?
         step_1:
           metrics_qdr:
             environment:
@@ -316,6 +317,7 @@ outputs:
                       - get_param: InternalTLSCAFile
                       - ro
                 - null
+#Can I use kolla permissions to do this instead?
           metrics_qdr_init_logs:
             command:
             - /bin/bash
@@ -331,12 +333,19 @@ outputs:
             volumes:
             - /var/log/containers/metrics_qdr:/var/log/qdrouterd:z
 
-
       host_prep_tasks:
       - name: "Qdr host_prep_tasks tasks"
-        import_role:
+        include_role:
           name: tripleo-qdr-ansible-role
         vars:
         - deploy_stage: "host_prep_tasks"
         - {get_attr: [RoleParametersValue, value]}
 
+      deploy_steps_tasks:
+      - name: QDR Config on step 1
+        when: step == '1'
+        include_role:
+          name: tripleo-qdr-ansible-role
+        vars:
+          - deploy_stage: "deploy_steps_tasks"
+          - {get_attr: [RoleParametersValue, value]}
