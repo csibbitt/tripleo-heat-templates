@@ -179,6 +179,7 @@ outputs:
                         dport:
                           - 5667
                           - 5668
+# Trying to move as much of the tripleo::profile::base::metrics::qdr::* logic directly into tripleo-qdr-ansible-role main task
           - tripleo::profile::base::metrics::qdr::external_listener_addr:
               get_param: [EndpointMap, MetricsQdrPublic, host]
             tripleo::profile::base::metrics::qdr::listener_addr:
