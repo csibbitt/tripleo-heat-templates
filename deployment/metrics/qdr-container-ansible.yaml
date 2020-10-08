@@ -9,12 +9,6 @@ description: >
 # https://docs.openstack.org/tripleo-docs/latest/developer/tht_walkthrough/service_template_sections.html#ansible-related-parameters
 ###############################################################################
 
-###############################################################################
-# TODO: Check the indentation on each section that's imported from the
-# qdr-container-puppet.yaml template
-# There's a known issue with to_nice_yaml, that doesn't indent list elements
-###############################################################################
-
 parameters:
   ContainerMetricsQdrConfigImage:
     description: The container image to use for the qdrouterd config_volume
@@ -265,11 +259,11 @@ outputs:
         /var/lib/kolla/config_files/metrics_qdr.json:
           command: /usr/sbin/qdrouterd -c /etc/qpid-dispatch/qdrouterd.conf
           config_files:
-          - dest: /
+          - dest: /etc/qpid-dispatch/
             merge: true
             preserve_properties: true
             source: /var/lib/kolla/config_files/src/*
-          - dest: /
+          - dest: /etc/pki/tls/private/
             merge: true
             optional: true
             preserve_properties: true
