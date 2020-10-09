@@ -192,7 +192,7 @@ resources:
         - listener_require_ssl: { get_param: MetricsQdrUseSSL }
 # RFE to add support for this one? It seems to exist in puppet-qdr but be unused. So it's the same in my ansible for now
         - listener_trusted_certs: { get_param: MetricsQdrTrustedCerts }
-        - service_tripleo_service_net_mapnet_map: { get_param: ServiceNetMap }
+        - tripleo_service_net_map: { get_param: ServiceNetMap }
 # What does this do?
         - monitoring_subscription_qdr: { get_param: MonitoringSubscriptionQdr }
 # What does this do?
