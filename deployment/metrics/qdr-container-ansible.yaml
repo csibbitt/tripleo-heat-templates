@@ -93,15 +93,15 @@ parameters:
       separated list.
     type: string
   MetricsQdrSslCertDb:
-    default: ''
+    default: '/etc/ipa/ca.crt'
     description: Path to SSL certificate db for listener.
     type: string
   MetricsQdrSslCertFile:
-    default: ''
+    default: '/etc/pki/tls/certs/metrics_qdr.crt'
     description: Path to SSL certificate file for listener.
     type: string
   MetricsQdrSslKeyFile:
-    default: ''
+    default: '/etc/pki/tls/private/metrics_qdr.key'
     description: Path to SSL private key file for listener.
     type: string
   MetricsQdrSslPassword:
@@ -227,14 +227,14 @@ resources:
         - ssl_profiles: { get_param: MetricsQdrSSLProfiles }
 # May need this for network config
         - tripleo_endpoint_map: { get_param: EndpointMap }
-        - listener_ssl_cert_file: { get_param: MetricsQdrSslCertFile }
 # Unused? Especially now that I eliminated it
         - container_metrics_qdr_config_image: { get_param: ContainerMetricsQdrConfigImage }
-        - listener_ssl_cert_db: { get_param: MetricsQdrSslCertDb }
         - listener_sasl_mech: { get_param: MetricsQdrSaslMechanisms }
+        - listener_ssl_cert_db: { get_param: MetricsQdrSslCertDb }
+        - listener_ssl_cert_file: { get_param: MetricsQdrSslCertFile }
+        - listener_ssl_key_file: { get_param: MetricsQdrSslKeyFile }
 # RFE to add support for this one? It seems to exist in puppet-qdr but be unused. So it's the same in my ansible for now
         - listener_ssl_pw_file: { get_param: MetricsQdrSslPassword }
-        - listener_ssl_key_file: { get_param: MetricsQdrSslKeyFile }
         - listener_auth_peer: { get_param: MetricsQdrAuthenticateClient }
         - tripleo_enable_internal_tls: { get_param: EnableInternalTLS }
 
@@ -297,14 +297,16 @@ outputs:
           - if:
             - internal_tls_enabled
             - generate_service_certificates: true
-#Unused?
-              tripleo::metrics::qdr::service_certificate: '/etc/pki/tls/certs/metrics_qdr.crt'
-              tripleo::metrics::qdr::service_key: '/etc/pki/tls/private/metrics_qdr.key'
 
-# The CertmongerUser service will be looking for these. Can I write them from ansible instead of here?
+# Can I write these certmonger values from ansible instead of here?
+# My ansible may need to produce certmonger-metrics-qdr-refresh.sh ?
+# These are used by https://github.com/openstack/puppet-tripleo/blob/23478b8128bfcccfb75d1c60010ec232ce8c2978/files/certmonger-metrics-qdr-refresh.sh#L8
+              tripleo::metrics::qdr::service_certificate: { get_param: MetricsQdrSslCertFile }
+              tripleo::metrics::qdr::service_key: { get_param: MetricsQdrSslKeyFile }
+# The CertmongerUser service will be looking for these. https://github.com/openstack/puppet-tripleo/blob/23478b8128bfcccfb75d1c60010ec232ce8c2978/manifests/profile/base/certmonger_user.pp#L88
               tripleo::profile::base::metrics::qdr::certificate_specs:
-                service_certificate: '/etc/pki/tls/certs/metrics_qdr.crt'
-                service_key: '/etc/pki/tls/private/metrics_qdr.key'
+                service_certificate: { get_param: MetricsQdrSslCertFile }
+                service_key: { get_param: MetricsQdrSslKeyFile }
                 postsave_cmd: "/usr/bin/certmonger-metrics-qdr-refresh.sh"
                 hostname:
                   str_replace:
@@ -334,8 +336,8 @@ outputs:
                 list_concat:
                   - get_param: MetricsQdrSSLProfiles
                   - - name: 'tlsProfile'
-                      certFile: '/etc/pki/tls/certs/metrics_qdr.crt'
-                      keyFile: '/etc/pki/tls/private/metrics_qdr.key'
+                      certFile: { get_param: MetricsQdrSslCertFile }
+                      keyFile: { get_param: MetricsQdrSslKeyFile }
 # This is already in ansible as tripleo_internal_tlscafile
                       caCertFile: {get_param: InternalTLSCAFile}
             - tripleo::profile::base::metrics::qdr::ssl_profiles: {get_param: MetricsQdrSSLProfiles}
