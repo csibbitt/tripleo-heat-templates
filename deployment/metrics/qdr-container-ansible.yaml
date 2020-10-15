@@ -195,7 +195,8 @@ resources:
         - tripleo_service_net_map: { get_param: ServiceNetMap }
 # What does this do?
         - monitoring_subscription_qdr: { get_param: MonitoringSubscriptionQdr }
-# What does this do?
+# These are used to create a sasldb user. The qdr-config-ansible-role needs to be updated to handle this.
+        - username: { get_param: MetricsQdrUsername }
         - password: { get_param: MetricsQdrPassword }
         - tripleo_role_name: { get_param: RoleName }
 # Unused?
@@ -212,7 +213,6 @@ resources:
 # Do I need this?
         - role_parameters: { get_param: RoleParameters }
         - addresses: { get_param: MetricsQdrAddresses }
-        - username: { get_param: MetricsQdrUsername }
         - listener_port: { get_param: MetricsQdrPort }
 # Unused? Does rsyslog need to find this in the hiera data on the host or something?
       # service_config_settings:
@@ -274,7 +274,7 @@ outputs:
             merge: true
             preserve_properties: true
             source: /var/lib/kolla/config_files/src/*
-          - dest: /etc/pki/tls/private/
+          - dest: /
             merge: true
             optional: true
             preserve_properties: true
