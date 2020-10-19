@@ -188,16 +188,16 @@ resources:
       type: json
       value:
         map_merge:
-        - connectors: { get_param: MetricsQdrConnectors }
-        - listener_require_ssl: { get_param: MetricsQdrUseSSL }
+        - qdr_connectors: { get_param: MetricsQdrConnectors }
+        - qdr_listener_require_ssl: { get_param: MetricsQdrUseSSL }
 # RFE to add support for this one? It seems to exist in puppet-qdr but be unused. So it's the same in my ansible for now
-        - listener_trusted_certs: { get_param: MetricsQdrTrustedCerts }
+        - qdr_listener_trusted_certs: { get_param: MetricsQdrTrustedCerts }
         - tripleo_service_net_map: { get_param: ServiceNetMap }
 # What does this do?
         - monitoring_subscription_qdr: { get_param: MonitoringSubscriptionQdr }
 # These are used to create a sasldb user. The qdr-config-ansible-role needs to be updated to handle this.
-        - username: { get_param: MetricsQdrUsername }
-        - password: { get_param: MetricsQdrPassword }
+        - qdr_username: { get_param: MetricsQdrUsername }
+        - qdr_password: { get_param: MetricsQdrPassword }
         - tripleo_role_name: { get_param: RoleName }
 # Unused?
         - metrics_qdr_use_encryption: { get_param: MetricsQdrUseEncryption }
@@ -205,15 +205,15 @@ resources:
         - metrics_qdr_ssl_pw_file: { get_param: MetricsQdrSslPwFile }
 # Unused?
         - default_passwords: { get_param: DefaultPasswords }
-        - auto_links: { get_param: MetricsQdrAutoLinks }
+        - qdr_autolink_addresses: { get_param: MetricsQdrAutoLinks }
 # Unused?
         - metrics_qdr_external_endpoint: { get_param: MetricsQdrExternalEndpoint }
 # Need to re-implement logic for this one
         - tripleo_internal_tlscafile: { get_param: InternalTLSCAFile }
 # Do I need this?
         - role_parameters: { get_param: RoleParameters }
-        - addresses: { get_param: MetricsQdrAddresses }
-        - listener_port: { get_param: MetricsQdrPort }
+        - qdr_addresses: { get_param: MetricsQdrAddresses }
+        - qdr_listener_port: { get_param: MetricsQdrPort }
 # Unused? Does rsyslog need to find this in the hiera data on the host or something?
       # service_config_settings:
       #   rsyslog:
@@ -224,18 +224,18 @@ resources:
         - container_metrics_qdr_image: { get_param: ContainerMetricsQdrImage }
 # May need this for network config
         - tripleo_service_data: { get_param: ServiceData }
-        - ssl_profiles: { get_param: MetricsQdrSSLProfiles }
+        - qdr_ssl_profiles: { get_param: MetricsQdrSSLProfiles }
 # May need this for network config
         - tripleo_endpoint_map: { get_param: EndpointMap }
 # Unused? Especially now that I eliminated it
         - container_metrics_qdr_config_image: { get_param: ContainerMetricsQdrConfigImage }
-        - listener_sasl_mech: { get_param: MetricsQdrSaslMechanisms }
-        - listener_ssl_cert_db: { get_param: MetricsQdrSslCertDb }
-        - listener_ssl_cert_file: { get_param: MetricsQdrSslCertFile }
-        - listener_ssl_key_file: { get_param: MetricsQdrSslKeyFile }
+        - qdr_listener_sasl_mech: { get_param: MetricsQdrSaslMechanisms }
+        - qdr_listener_ssl_cert_db: { get_param: MetricsQdrSslCertDb }
+        - qdr_listener_ssl_cert_file: { get_param: MetricsQdrSslCertFile }
+        - qdr_listener_ssl_key_file: { get_param: MetricsQdrSslKeyFile }
 # RFE to add support for this one? It seems to exist in puppet-qdr but be unused. So it's the same in my ansible for now
         - listener_ssl_pw_file: { get_param: MetricsQdrSslPassword }
-        - listener_auth_peer: { get_param: MetricsQdrAuthenticateClient }
+        - qdr_listener_auth_peer: { get_param: MetricsQdrAuthenticateClient }
         - tripleo_enable_internal_tls: { get_param: EnableInternalTLS }
 
         #####################################################################
@@ -331,16 +331,16 @@ outputs:
                               params:
                                 ROLENAME: {get_param: RoleName}
 
-# These could be constructed in ansible from listener_ssl_cert_file and listener_ssl_key_file
-              tripleo::profile::base::metrics::qdr::ssl_profiles:
-                list_concat:
-                  - get_param: MetricsQdrSSLProfiles
-                  - - name: 'tlsProfile'
-                      certFile: { get_param: MetricsQdrSslCertFile }
-                      keyFile: { get_param: MetricsQdrSslKeyFile }
-# This is already in ansible as tripleo_internal_tlscafile
-                      caCertFile: {get_param: InternalTLSCAFile}
-            - tripleo::profile::base::metrics::qdr::ssl_profiles: {get_param: MetricsQdrSSLProfiles}
+# # These are constructed in ansible from listener_ssl_cert_file and listener_ssl_key_file
+#               tripleo::profile::base::metrics::qdr::ssl_profiles:
+#                 list_concat:
+#                   - get_param: MetricsQdrSSLProfiles
+#                   - - name: 'tlsProfile'
+#                       certFile: { get_param: MetricsQdrSslCertFile }
+#                       keyFile: { get_param: MetricsQdrSslKeyFile }
+# # This is already in ansible as tripleo_internal_tlscafile
+#                       caCertFile: {get_param: InternalTLSCAFile}
+#             - tripleo::profile::base::metrics::qdr::ssl_profiles: {get_param: MetricsQdrSSLProfiles}
 
       #########################################################################
       # TODO: Check that indentation is correct
