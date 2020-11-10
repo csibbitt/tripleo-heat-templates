@@ -172,7 +172,7 @@ parameters:
 
 conditions:
   internal_tls_enabled: {equals: [{get_param: EnableInternalTLS}, true]}
-  enable_stf: {equals: [{get_param: EnableSTF}, true]}
+#  enable_stf: {equals: [{get_param: EnableSTF}, true]}
 
 resources:
   #############################################################################
@@ -206,7 +206,7 @@ resources:
 # Unused?
         - default_passwords: { get_param: DefaultPasswords }
         - qdr_autolink_addresses: { get_param: MetricsQdrAutoLinks }
-# Unused?
+# Unused? Used to configure haproxy probably?
         - metrics_qdr_external_endpoint: { get_param: MetricsQdrExternalEndpoint }
 # Need to re-implement logic for this one
         - tripleo_internal_tlscafile: { get_param: InternalTLSCAFile }
@@ -234,9 +234,12 @@ resources:
         - qdr_listener_ssl_cert_file: { get_param: MetricsQdrSslCertFile }
         - qdr_listener_ssl_key_file: { get_param: MetricsQdrSslKeyFile }
 # RFE to add support for this one? It seems to exist in puppet-qdr but be unused. So it's the same in my ansible for now
-        - listener_ssl_pw_file: { get_param: MetricsQdrSslPassword }
+        - qdr_listener_ssl_password: { get_param: MetricsQdrSslPassword }
         - qdr_listener_auth_peer: { get_param: MetricsQdrAuthenticateClient }
         - tripleo_enable_internal_tls: { get_param: EnableInternalTLS }
+
+#***** TODO: What will be the new config to add to ControllerExtraConfig or similar to switch this to interior?
+        - qdr_router_mode: edge
 
         #####################################################################
         # The last element should be the QdrVars, which
@@ -294,6 +297,7 @@ outputs:
             path: /etc/pki/tls/private/metrics_qdr.key
       config_settings:
         map_merge:
+          - tripleo::haproxy::metrics_qdr: {get_param: MetricsQdrExternalEndpoint}
           - if:
             - internal_tls_enabled
             - generate_service_certificates: true
@@ -340,7 +344,7 @@ outputs:
 #                       keyFile: { get_param: MetricsQdrSslKeyFile }
 # # This is already in ansible as tripleo_internal_tlscafile
 #                       caCertFile: {get_param: InternalTLSCAFile}
-#             - tripleo::profile::base::metrics::qdr::ssl_profiles: {get_param: MetricsQdrSSLProfiles}
+            - tripleo::profile::base::metrics::qdr::ssl_profiles: {get_param: MetricsQdrSSLProfiles}
 
       #########################################################################
       # TODO: Check that indentation is correct
@@ -383,6 +387,7 @@ outputs:
                   #     - ro
                 - null
 
+#***** TODO: Name tasks according to what they do, use tasks_from instead of include_rule and eliminate switching on deploy_stage in the ansible
       host_prep_tasks:
       - name: "Qdr host_prep_tasks tasks"
         include_role:
@@ -397,5 +402,5 @@ outputs:
         include_role:
           name: tripleo-qdr-ansible-role
         vars:
-          - deploy_stage: "deploy_steps_tasks"
+          - deploy_stage: "deploy_steps_tasks"  # THT should do all logic that has to do with "steps"
           - {get_attr: [RoleParametersValue, value]}
