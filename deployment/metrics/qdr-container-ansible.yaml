@@ -387,7 +387,7 @@ outputs:
                   #     - ro
                 - null
 
-#***** TODO: Name tasks according to what they do, use tasks_from instead of include_rule and eliminate switching on deploy_stage in the ansible
+#***** TODO: Name tasks according to what they do, use tasks_from instead of switching on deploy_stage in the ansible
       host_prep_tasks:
       - name: "Qdr host_prep_tasks tasks"
         include_role:
