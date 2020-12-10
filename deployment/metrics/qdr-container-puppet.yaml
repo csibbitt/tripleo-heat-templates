@@ -7,6 +7,7 @@ parameters:
   ContainerMetricsQdrImage:
     description: image
     type: string
+  # *CS REMOVED IN ANSIBLE DEPLOYMENT: I used kolla_config to accomplish what this did
   ContainerMetricsQdrConfigImage:
     description: The container image to use for the qdrouterd config_volume
     type: string
@@ -179,7 +180,6 @@ outputs:
                         dport:
                           - 5667
                           - 5668
-# Trying to move as much of the tripleo::profile::base::metrics::qdr::* logic directly into tripleo-qdr-ansible-role main task
           - tripleo::profile::base::metrics::qdr::external_listener_addr:
               get_param: [EndpointMap, MetricsQdrPublic, host]
             tripleo::profile::base::metrics::qdr::listener_addr:
@@ -334,6 +334,7 @@ outputs:
                   - internal_tls_enabled
                   - - /etc/pki/tls/certs/metrics_qdr.crt:/var/lib/kolla/config_files/src-tls/etc/pki/tls/certs/metrics_qdr.crt:ro
                     - /etc/pki/tls/private/metrics_qdr.key:/var/lib/kolla/config_files/src-tls/etc/pki/tls/private/metrics_qdr.key:ro
+                    #*CS REMOVED IN ANSIBLE DEPLOYMENT: These are set in ContainersCommon
                     - list_join:
                       - ':'
                       - - {get_param: InternalTLSCAFile}

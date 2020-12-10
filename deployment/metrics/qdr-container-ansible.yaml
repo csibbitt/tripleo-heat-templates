@@ -4,28 +4,19 @@ heat_template_version: rocky
 description: >
   Qpid dispatch router service for metrics and monitoring purposes
 
-###############################################################################
-# NOTE: Contents of this files are based on
-# https://docs.openstack.org/tripleo-docs/latest/developer/tht_walkthrough/service_template_sections.html#ansible-related-parameters
-###############################################################################
-
 parameters:
-  ContainerMetricsQdrConfigImage:
-    description: The container image to use for the qdrouterd config_volume
-    type: string
   ContainerMetricsQdrImage:
     description: image
     type: string
+  # *CS TODO: Check that we actually have an entry in here and we use it if so
   DefaultPasswords:
     default: {}
     type: json
+  # *CS Unused, was unused in puppet version too
   EnableInternalTLS:
     default: false
     type: boolean
-  EnableSTF:
-    default: false
-    description: Set to true to enable configuration for STF client.
-    type: boolean
+  # *CS Unused? Needed for network config?
   EndpointMap:
     default: {}
     description: Mapping of service endpoint -> protocol. Typically set via parameter_defaults
@@ -61,11 +52,7 @@ parameters:
   MetricsQdrExternalEndpoint:
     default: false
     description: 'Whether QDR should listen on external network interface. To enable
-      listening
-
-      on external network one must deploy QDRs in mesh mode.
-
-      '
+      listening on external network one must deploy QDRs in mesh mode.'
     type: boolean
   MetricsQdrLoggingSource:
     default:
@@ -137,10 +124,11 @@ parameters:
     default: ''
     description: Role name on which the service is applied
     type: string
-  RoleParameters:
-    default: {}
-    description: Parameters specific to the role
-    type: json
+  # *CS TODO: Implement the merging of MetricsQdrVars with RoleParameters so all our vars become overridable per-role?
+  # RoleParameters:
+  #   default: {}
+  #   description: Parameters specific to the role
+  #   type: json
   ServiceData:
     default: {}
     description: Dictionary packing service data
@@ -151,19 +139,18 @@ parameters:
       in the resource registry.  This mapping overrides those in ServiceNetMapDefaults.
     type: json
 
-
   ##############################################################################
-  # The existing collectd parameters will be combined with
-  # QdrVars in the RoleParametersValue below. Eventually,
+  # The existing MetricsQdr parameters will be combined with
+  # MetricsQdrVars in the MetricsQdrParametersValue below. Eventually,
   # these legacy parameters will be deprecated in favour of passing the
-  # parameters into the QdrVars param below.
-  # For backwards compatibility these legacy params will be acceptd, but will
-  # be overwritten by any element passed to Qdr.
+  # parameters into the MetricsQdrVars param below.
+  # For backwards compatibility these legacy params will be accepted, but will
+  # be overwritten by any element passed to MetricsQdrVars.
   # New configs should add the vars directly into the
-  # QdrVar parameter, which will not require anymore
+  # MetricsQdrVars parameter, which will not require anymore
   # changes in THT to add new params.
   ##############################################################################
-  QdrVars:
+  MetricsQdrVars:
     default: {}
     description: Hash of qdr variables used to configure the qdr role.
     tags:
@@ -172,102 +159,81 @@ parameters:
 
 conditions:
   internal_tls_enabled: {equals: [{get_param: EnableInternalTLS}, true]}
-#  enable_stf: {equals: [{get_param: EnableSTF}, true]}
 
 resources:
-  #############################################################################
-  # TODO: Check that indentation is correct (list items don't indent)
-  #############################################################################
   ContainersCommon:
     type: ../containers-common.yaml
 
-
-  RoleParametersValue:
+  MetricsQdrParametersValue:
     type: OS::Heat::Value
     properties:
       type: json
       value:
         map_merge:
         - qdr_connectors: { get_param: MetricsQdrConnectors }
-        - qdr_listener_require_ssl: { get_param: MetricsQdrUseSSL }
-# RFE to add support for this one? It seems to exist in puppet-qdr but be unused. So it's the same in my ansible for now
-        - qdr_listener_trusted_certs: { get_param: MetricsQdrTrustedCerts }
-        - tripleo_service_net_map: { get_param: ServiceNetMap }
-# What does this do?
-        - monitoring_subscription_qdr: { get_param: MonitoringSubscriptionQdr }
-# These are used to create a sasldb user. The qdr-config-ansible-role needs to be updated to handle this.
-        - qdr_username: { get_param: MetricsQdrUsername }
-        - qdr_password: { get_param: MetricsQdrPassword }
-        - tripleo_role_name: { get_param: RoleName }
-# Unused?
-        - metrics_qdr_use_encryption: { get_param: MetricsQdrUseEncryption }
-# Unused?
-        - metrics_qdr_ssl_pw_file: { get_param: MetricsQdrSslPwFile }
-# Unused?
-        - default_passwords: { get_param: DefaultPasswords }
-        - qdr_autolink_addresses: { get_param: MetricsQdrAutoLinks }
-# Unused? Used to configure haproxy probably?
-        - metrics_qdr_external_endpoint: { get_param: MetricsQdrExternalEndpoint }
-# Need to re-implement logic for this one
-        - tripleo_internal_tlscafile: { get_param: InternalTLSCAFile }
-# Do I need this?
-        - role_parameters: { get_param: RoleParameters }
-        - qdr_addresses: { get_param: MetricsQdrAddresses }
-        - qdr_listener_port: { get_param: MetricsQdrPort }
-# Unused? Does rsyslog need to find this in the hiera data on the host or something?
-      # service_config_settings:
-      #   rsyslog:
-      #     tripleo_logging_sources_metrics_qdr:
-      #       - {get_param: MetricsQdrLoggingSource}
-        - metrics_qdr_logging_source: { get_param: MetricsQdrLoggingSource }
-# Unused?
-        - container_metrics_qdr_image: { get_param: ContainerMetricsQdrImage }
-# May need this for network config
-        - tripleo_service_data: { get_param: ServiceData }
-        - qdr_ssl_profiles: { get_param: MetricsQdrSSLProfiles }
-# May need this for network config
-        - tripleo_endpoint_map: { get_param: EndpointMap }
-# Unused? Especially now that I eliminated it
-        - container_metrics_qdr_config_image: { get_param: ContainerMetricsQdrConfigImage }
-        - qdr_listener_sasl_mech: { get_param: MetricsQdrSaslMechanisms }
-        - qdr_listener_ssl_cert_db: { get_param: MetricsQdrSslCertDb }
-        - qdr_listener_ssl_cert_file: { get_param: MetricsQdrSslCertFile }
-        - qdr_listener_ssl_key_file: { get_param: MetricsQdrSslKeyFile }
-# RFE to add support for this one? It seems to exist in puppet-qdr but be unused. So it's the same in my ansible for now
-        - qdr_listener_ssl_password: { get_param: MetricsQdrSslPassword }
-        - qdr_listener_auth_peer: { get_param: MetricsQdrAuthenticateClient }
-        - tripleo_enable_internal_tls: { get_param: EnableInternalTLS }
+          qdr_listener_require_ssl: { get_param: MetricsQdrUseSSL }
+          # *CS RFE to add support for this one? It seems to exist in puppet-qdr but be unused. So it's the same in my ansible for now
+          qdr_listener_trusted_certs: { get_param: MetricsQdrTrustedCerts }
+          # *CS TODO: In puppet These two are used to create a sasldb user. The qdr-config-ansible-role needs to be updated to handle this.
+          qdr_username: { get_param: MetricsQdrUsername }
+          qdr_password: { get_param: MetricsQdrPassword }
+          # *CS Unused?
+          metrics_qdr_use_encryption: { get_param: MetricsQdrUseEncryption }
+          # *CS Unused?
+          metrics_qdr_ssl_pw_file: { get_param: MetricsQdrSslPwFile }
+          # *CS Unused?
+          default_passwords: { get_param: DefaultPasswords }
+          qdr_autolink_addresses: { get_param: MetricsQdrAutoLinks }
+          # *CS Unused? (check puppet-qdr) - Used below in some haproxy hierdata
+          metrics_qdr_external_endpoint: { get_param: MetricsQdrExternalEndpoint }
+          # *CS TODO: Need to re-implement logic for this one (currently a hardcoded path I think?)
+          tripleo_internal_tlscafile: { get_param: InternalTLSCAFile }
+          qdr_addresses: { get_param: MetricsQdrAddresses }
+          qdr_listener_port: { get_param: MetricsQdrPort }
+          qdr_ssl_profiles: { get_param: MetricsQdrSSLProfiles }
+          # *CS May need this for network config?
+          #tripleo_endpoint_map: { get_param: EndpointMap }
+          qdr_listener_sasl_mech: { get_param: MetricsQdrSaslMechanisms }
+          qdr_listener_ssl_cert_db: { get_param: MetricsQdrSslCertDb }
+          qdr_listener_ssl_cert_file: { get_param: MetricsQdrSslCertFile }
+          qdr_listener_ssl_key_file: { get_param: MetricsQdrSslKeyFile }
+          # *CS TODO: RFE to add support for this one? It seems to exist in puppet-qdr but be unused. So it's the same in my ansible for now
+          qdr_listener_ssl_password: { get_param: MetricsQdrSslPassword }
+          qdr_listener_auth_peer: { get_param: MetricsQdrAuthenticateClient }
+          tripleo_enable_internal_tls: { get_param: EnableInternalTLS }
+          # *CS TODO: What will be the new config to add to ControllerExtraConfig or similar to switch this to interior?
+          # use MetricsQdrVars.deployment_mode == controller_mesh 
+          # qdr_router_mode: edge
+          # It would be nice (RFE) to be able to use per-role config to set which role becomes the mesh
 
-#***** TODO: What will be the new config to add to ControllerExtraConfig or similar to switch this to interior?
-        - qdr_router_mode: edge
-
-        #####################################################################
-        # The last element should be the QdrVars, which
-        # overides any of the legacy parameters above.
-        #####################################################################
-        - { get_param: QdrVars }
+        - { get_param: MetricsQdrVars }
 
 outputs:
   role_data:
     description: Role data for the metrics Qdr role.
     value:
+
+      # *CS Q: I assume this is mandatory?
       service_name: qdr
 
-# What does this do?? Does not solve <13>Oct 13 15:12:12 puppet-user: Error: /Stage[main]/Tripleo::Certmonger::Metrics_qdr/Certmonger_certificate[metrics_qdr]: Could not evaluate: The certificate 'metrics_qdr' wasn't found in the list.",
-      # metadata_settings:
-      #   if:
-      #     - internal_tls_enabled
-      #     -
-      #       - service: metrics_qdr
-      #         network:
-      #           get_param:
-      #             - ServiceNetMap
-      #             - str_replace:
-      #                 template: "ROLENAMEMetricsQdrNetwork"
-      #                 params:
-      #                   ROLENAME: {get_param: RoleName}
-      #         type: node
-      #     - null
+      # *CS This appears related to sensu somehow
+      monitoring_subscription: {get_param: MonitoringSubscriptionQdr}
+
+      # See https://docs.openstack.org/tripleo-docs/latest/developer/tht_walkthrough/tls_for_services.html
+      metadata_settings:
+        if:
+          - internal_tls_enabled
+          -
+            - service: metrics_qdr
+              network:
+                get_param:
+                  - ServiceNetMap
+                  - str_replace:
+                      template: "ROLENAMEMetricsQdrNetwork"
+                      params:
+                        ROLENAME: {get_param: RoleName}
+              type: node
+          - null
 
       kolla_config:
         /var/lib/kolla/config_files/metrics_qdr.json:
@@ -295,19 +261,44 @@ outputs:
           - optional: true
             owner: qdrouterd:qdrouterd
             path: /etc/pki/tls/private/metrics_qdr.key
+
+      service_config_settings:
+        # *CS TODO: Check this works as intended (?? Rsyslog config regex is set or something?)
+        rsyslog:
+          tripleo_logging_sources_metrics_qdr:
+            - {get_param: MetricsQdrLoggingSource}
+
       config_settings:
         map_merge:
+            # *CS TODO: Check this works as intended (ha proxy leads into our external endpoint in mesh mode)
           - tripleo::haproxy::metrics_qdr: {get_param: MetricsQdrExternalEndpoint}
+
+            # *CS TODO: Check this works as intended (firewall rules appear on the nodes)
+            tripleo::metrics_qdr::firewall_rules:
+              map_merge:
+              - '109 metrics qdr':
+                  dport:
+                    - {get_param: MetricsQdrPort}
+              - map_merge:
+                  repeat:
+                    for_each:
+                      <%net_cidr%>: {get_param: [ServiceData, net_cidr_map, ctlplane]}
+                    template:
+                      '109 accept internal metrics qdr ctlplane subnet <%net_cidr%>':
+                        dport:
+                          - 5667
+                          - 5668
           - if:
             - internal_tls_enabled
+            # My ansible does not use any of these, but the certmonger puppet automation needs them
+            # *CS Q: Is the "s" optional? The docs say "generate_service_certificate": https://docs.openstack.org/project-deploy-guide/tripleo-docs/latest/features/ssl.html
             - generate_service_certificates: true
 
-# Can I write these certmonger values from ansible instead of here?
-# My ansible may need to produce certmonger-metrics-qdr-refresh.sh ?
-# These are used by https://github.com/openstack/puppet-tripleo/blob/23478b8128bfcccfb75d1c60010ec232ce8c2978/files/certmonger-metrics-qdr-refresh.sh#L8
+              # These two are used here: https://github.com/openstack/puppet-tripleo/blob/23478b8128bfcccfb75d1c60010ec232ce8c2978/files/certmonger-metrics-qdr-refresh.sh#L8-L10
               tripleo::metrics::qdr::service_certificate: { get_param: MetricsQdrSslCertFile }
               tripleo::metrics::qdr::service_key: { get_param: MetricsQdrSslKeyFile }
-# The CertmongerUser service will be looking for these. https://github.com/openstack/puppet-tripleo/blob/23478b8128bfcccfb75d1c60010ec232ce8c2978/manifests/profile/base/certmonger_user.pp#L88
+
+              # This one is used here: https://github.com/openstack/puppet-tripleo/blob/23478b8128bfcccfb75d1c60010ec232ce8c2978/manifests/profile/base/certmonger_user.pp#L193
               tripleo::profile::base::metrics::qdr::certificate_specs:
                 service_certificate: { get_param: MetricsQdrSslCertFile }
                 service_key: { get_param: MetricsQdrSslKeyFile }
@@ -335,23 +326,6 @@ outputs:
                               params:
                                 ROLENAME: {get_param: RoleName}
 
-# # These are constructed in ansible from listener_ssl_cert_file and listener_ssl_key_file
-#               tripleo::profile::base::metrics::qdr::ssl_profiles:
-#                 list_concat:
-#                   - get_param: MetricsQdrSSLProfiles
-#                   - - name: 'tlsProfile'
-#                       certFile: { get_param: MetricsQdrSslCertFile }
-#                       keyFile: { get_param: MetricsQdrSslKeyFile }
-# # This is already in ansible as tripleo_internal_tlscafile
-#                       caCertFile: {get_param: InternalTLSCAFile}
-            - tripleo::profile::base::metrics::qdr::ssl_profiles: {get_param: MetricsQdrSSLProfiles}
-
-      #########################################################################
-      # TODO: Check that indentation is correct
-      #########################################################################
-      # TODO: Check that the output is correct, some heat functional are
-      # called here, and they get formatted with the rest of the yaml
-      #########################################################################
       docker_config:
         step_1:
           metrics_qdr:
@@ -379,22 +353,16 @@ outputs:
                 - internal_tls_enabled
                 - - /etc/pki/tls/certs/metrics_qdr.crt:/var/lib/kolla/config_files/src-tls/etc/pki/tls/certs/metrics_qdr.crt:ro
                   - /etc/pki/tls/private/metrics_qdr.key:/var/lib/kolla/config_files/src-tls/etc/pki/tls/private/metrics_qdr.key:ro
-# These are set in ContainersCommon
-                  # - list_join:
-                  #   - ':'
-                  #   - - get_param: InternalTLSCAFile
-                  #     - get_param: InternalTLSCAFile
-                  #     - ro
                 - null
 
-#***** TODO: Name tasks according to what they do, use tasks_from instead of include_rule and eliminate switching on deploy_stage in the ansible
+      # *CS TODO: Name tasks according to what they do, use tasks_from instead of include_rule and eliminate switching on deploy_stage in the ansible
       host_prep_tasks:
       - name: "Qdr host_prep_tasks tasks"
         include_role:
           name: tripleo-qdr-ansible-role
         vars:
         - deploy_stage: "host_prep_tasks"
-        - {get_attr: [RoleParametersValue, value]}
+        - {get_attr: [MetricsQdrParametersValue, value]}
 
       deploy_steps_tasks:
       - name: QDR Config on step 1
@@ -403,4 +371,4 @@ outputs:
           name: tripleo-qdr-ansible-role
         vars:
           - deploy_stage: "deploy_steps_tasks"  # THT should do all logic that has to do with "steps"
-          - {get_attr: [RoleParametersValue, value]}
+          - {get_attr: [MetricsQdrParametersValue, value]}

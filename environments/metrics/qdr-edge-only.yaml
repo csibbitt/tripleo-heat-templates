@@ -7,14 +7,16 @@ resource_registry:
   OS::TripleO::Services::MetricsQdr: ../../deployment/metrics/qdr-container-ansible.yaml
 
 parameter_defaults:
-  ExtraConfig:
-    tripleo::profile::base::metrics::qdr::interior_mesh_nodes: ''
-    tripleo::profile::base::metrics::qdr::router_mode: edge
-  #MetricsQdrConnectors:
-  #  - host: qdr-normal-sa-telemetry.apps.remote.tld
-  #    port: 443
-  #    role: inter-router
-  #    sslProfile: sslProfile
-  #    verifyHostname: false
-  #MetricsQdrSSLProfiles:
-  #  - name: sslProfile
+
+  # Exercise the new, preferred interface
+  MetricsQdrVars:
+    deployment_mode: edge_only  # or controller_mesh
+    qdr_connectors:
+      - host: stf-default-interconnect-5671-service-telemetry.apps-crc.testing
+        port: 443
+        role: edge
+        sslProfile: sslProfile
+        verifyHostname: false
+
+  # Test that legacy vars work too
+  MetricsQdrAuthenticateClient: 'yes'
