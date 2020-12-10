@@ -125,10 +125,10 @@ parameters:
     description: Role name on which the service is applied
     type: string
   # *CS TODO: Implement the merging of MetricsQdrVars with RoleParameters so all our vars become overridable per-role?
-  # RoleParameters:
-  #   default: {}
-  #   description: Parameters specific to the role
-  #   type: json
+  RoleParameters:
+    default: {}
+    description: Parameters specific to the role
+    type: json
   ServiceData:
     default: {}
     description: Dictionary packing service data
