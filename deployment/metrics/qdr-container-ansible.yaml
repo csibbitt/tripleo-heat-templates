@@ -325,7 +325,7 @@ outputs:
                               template: "ROLENAMEMetricsQdrNetwork"
                               params:
                                 ROLENAME: {get_param: RoleName}
-
+            - # Empty then
       docker_config:
         step_1:
           metrics_qdr:
