@@ -4,18 +4,26 @@
 ## and QDRs running on other node types will connect in edge mode to the interior routers running on the controllers.
 
 
+
 resource_registry:
   OS::TripleO::Services::MetricsQdr: ../../deployment/metrics/qdr-container-ansible.yaml
 
-
 parameter_defaults:
-  ControllerExtraConfig:
-    tripleo::profile::base::metrics::qdr::router_mode: interior
-  #MetricsQdrConnectors:
-  #  - host: qdr-normal-sa-telemetry.apps.remote.tld
-  #    port: 443
-  #    role: inter-router
-  #    sslProfile: sslProfile
-  #    verifyHostname: false
-  #MetricsQdrSSLProfiles:
-  #  - name: sslProfile
+  # Exercise the new, preferred interface
+  MetricsQdrVars:
+    # *CS: Here we name which nodes will form the mesh
+    # Q1. Does it make sense to split the QDR into two services?
+    #    OS::TripleO::Services::MetricsQdrMesh
+    #    OS::TripleO::Services::MetricsEdge
+    #  When the automation configures the edge mode nodes it would need to check to see if MetricsQdrMesh is
+    #  deployed anywhere and then behave accordingly (replace STF connection with connection into mesh).
+    interior_nodes: "%{hiera('controller_node_ips')"
+    qdr_connectors:
+      - host: stf-default-interconnect-5671-service-telemetry.apps-crc.testing
+        port: 443
+        role: edge
+        sslProfile: sslProfile
+        verifyHostname: false
+
+  # Test that legacy vars work too
+  MetricsQdrAuthenticateClient: 'yes'

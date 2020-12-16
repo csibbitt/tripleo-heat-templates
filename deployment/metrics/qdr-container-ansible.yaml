@@ -157,6 +157,7 @@ parameters:
     - role_specific
     type: json
 
+
 conditions:
   internal_tls_enabled: {equals: [{get_param: EnableInternalTLS}, true]}
 
@@ -201,11 +202,6 @@ resources:
           qdr_listener_ssl_password: { get_param: MetricsQdrSslPassword }
           qdr_listener_auth_peer: { get_param: MetricsQdrAuthenticateClient }
           tripleo_enable_internal_tls: { get_param: EnableInternalTLS }
-          # *CS TODO: What will be the new config to add to ControllerExtraConfig or similar to switch this to interior?
-          # use MetricsQdrVars.deployment_mode == controller_mesh 
-          # qdr_router_mode: edge
-          # It would be nice (RFE) to be able to use per-role config to set which role becomes the mesh
-
         - { get_param: MetricsQdrVars }
 
 outputs:
