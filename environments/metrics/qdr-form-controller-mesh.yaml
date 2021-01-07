@@ -11,13 +11,12 @@ resource_registry:
 parameter_defaults:
   # Exercise the new, preferred interface
   MetricsQdrVars:
-    # *CS: Here we name which nodes will form the mesh
-    # Q1. Does it make sense to split the QDR into two services?
+    # *CS Q: Does it make sense to split the QDR into two services?
     #    OS::TripleO::Services::MetricsQdrMesh
     #    OS::TripleO::Services::MetricsEdge
     #  When the automation configures the edge mode nodes it would need to check to see if MetricsQdrMesh is
     #  deployed anywhere and then behave accordingly (replace STF connection with connection into mesh).
-    interior_nodes: "%{hiera('controller_node_ips')}"
+    deployment_mode: controller-mesh
     qdr_connectors:
       - host: stf-default-interconnect-5671-service-telemetry.apps-crc.testing
         port: 443

@@ -192,8 +192,6 @@ resources:
           qdr_addresses: { get_param: MetricsQdrAddresses }
           qdr_listener_port: { get_param: MetricsQdrPort }
           qdr_ssl_profiles: { get_param: MetricsQdrSSLProfiles }
-          # *CS May need this for network config?
-          #tripleo_endpoint_map: { get_param: EndpointMap }
           qdr_listener_sasl_mech: { get_param: MetricsQdrSaslMechanisms }
           qdr_listener_ssl_cert_db: { get_param: MetricsQdrSslCertDb }
           qdr_listener_ssl_cert_file: { get_param: MetricsQdrSslCertFile }
@@ -208,8 +206,6 @@ outputs:
   role_data:
     description: Role data for the metrics Qdr role.
     value:
-
-      # *CS Q: I assume this is mandatory?
       service_name: qdr
 
       # *CS This appears related to sensu somehow
