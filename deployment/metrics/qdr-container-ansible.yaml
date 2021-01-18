@@ -347,20 +347,17 @@ outputs:
                   - /etc/pki/tls/private/metrics_qdr.key:/var/lib/kolla/config_files/src-tls/etc/pki/tls/private/metrics_qdr.key:ro
                 - null
 
-      # *CS TODO: Name tasks according to what they do, use tasks_from instead of include_rule and eliminate switching on deploy_stage in the ansible
       host_prep_tasks:
-      - name: "Qdr host_prep_tasks tasks"
+      - name: Create host dirs for QDR
         include_role:
           name: tripleo-qdr-ansible-role
-        vars:
-        - deploy_stage: "host_prep_tasks"
-        - {get_attr: [MetricsQdrParametersValue, value]}
+          tasks_from: create_required_host_dirs
 
       deploy_steps_tasks:
       - name: QDR Config on step 1
         when: step == '1'
         include_role:
           name: tripleo-qdr-ansible-role
+          tasks_from: create_config
         vars:
-          - deploy_stage: "deploy_steps_tasks"  # THT should do all logic that has to do with "steps"
           - {get_attr: [MetricsQdrParametersValue, value]}
