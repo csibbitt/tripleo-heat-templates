@@ -173,22 +173,7 @@ resources:
         map_merge:
         - qdr_connectors: { get_param: MetricsQdrConnectors }
           qdr_listener_require_ssl: { get_param: MetricsQdrUseSSL }
-          # *CS RFE to add support for this one? It seems to exist in puppet-qdr but be unused. So it's the same in my ansible for now
-          qdr_listener_trusted_certs: { get_param: MetricsQdrTrustedCerts }
-          # *CS TODO: In puppet These two are used to create a sasldb user. The qdr-config-ansible-role needs to be updated to handle this.
-          qdr_username: { get_param: MetricsQdrUsername }
-          qdr_password: { get_param: MetricsQdrPassword }
-          # *CS Unused?
-          metrics_qdr_use_encryption: { get_param: MetricsQdrUseEncryption }
-          # *CS Unused?
-          metrics_qdr_ssl_pw_file: { get_param: MetricsQdrSslPwFile }
-          # *CS Unused?
-          default_passwords: { get_param: DefaultPasswords }
           qdr_autolink_addresses: { get_param: MetricsQdrAutoLinks }
-          # *CS Unused? (check puppet-qdr) - Used below in some haproxy hierdata
-          metrics_qdr_external_endpoint: { get_param: MetricsQdrExternalEndpoint }
-          # *CS TODO: Need to re-implement logic for this one (currently a hardcoded path I think?)
-          tripleo_internal_tlscafile: { get_param: InternalTLSCAFile }
           qdr_addresses: { get_param: MetricsQdrAddresses }
           qdr_listener_port: { get_param: MetricsQdrPort }
           qdr_ssl_profiles: { get_param: MetricsQdrSSLProfiles }
@@ -196,10 +181,29 @@ resources:
           qdr_listener_ssl_cert_db: { get_param: MetricsQdrSslCertDb }
           qdr_listener_ssl_cert_file: { get_param: MetricsQdrSslCertFile }
           qdr_listener_ssl_key_file: { get_param: MetricsQdrSslKeyFile }
-          # *CS TODO: RFE to add support for this one? It seems to exist in puppet-qdr but be unused. So it's the same in my ansible for now
-          qdr_listener_ssl_password: { get_param: MetricsQdrSslPassword }
           qdr_listener_auth_peer: { get_param: MetricsQdrAuthenticateClient }
           tripleo_enable_internal_tls: { get_param: EnableInternalTLS }
+
+          ###### *CS These vars might need more work
+          # RFE to add support for this one? It seems to exist in puppet-qdr but be unused. So it's the same in my ansible for now
+          qdr_listener_trusted_certs: { get_param: MetricsQdrTrustedCerts }
+          # TODO: In puppet These two are used to create a sasldb user. The qdr-config-ansible-role needs to be updated to handle this.
+          qdr_username: { get_param: MetricsQdrUsername }
+          qdr_password: { get_param: MetricsQdrPassword }
+          # Unused?
+          metrics_qdr_use_encryption: { get_param: MetricsQdrUseEncryption }
+          # Unused?
+          metrics_qdr_ssl_pw_file: { get_param: MetricsQdrSslPwFile }
+          # Unused?
+          default_passwords: { get_param: DefaultPasswords }
+          # Unused? (check puppet-qdr) - Used below in some haproxy hierdata
+          metrics_qdr_external_endpoint: { get_param: MetricsQdrExternalEndpoint }
+          # TODO: Need to re-implement logic for this one (currently a hardcoded path I think?)
+          tripleo_internal_tlscafile: { get_param: InternalTLSCAFile }
+          # TODO: RFE to add support for this one? It seems to exist in puppet-qdr but be unused. So it's the same in my ansible for now
+          qdr_listener_ssl_password: { get_param: MetricsQdrSslPassword }
+          ######
+
         - { get_param: MetricsQdrVars }
 
 outputs:

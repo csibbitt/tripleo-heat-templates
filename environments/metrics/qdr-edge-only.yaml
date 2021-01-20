@@ -10,7 +10,7 @@ parameter_defaults:
 
   # Exercise the new, preferred interface
   MetricsQdrVars:
-    deployment_mode: edge-only
+    qdr_deployment_mode: edge-only
     qdr_connectors:
       - host: stf-default-interconnect-5671-service-telemetry.apps-crc.testing
         port: 443

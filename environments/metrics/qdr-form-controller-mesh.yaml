@@ -16,7 +16,7 @@ parameter_defaults:
     #    OS::TripleO::Services::MetricsEdge
     #  When the automation configures the edge mode nodes it would need to check to see if MetricsQdrMesh is
     #  deployed anywhere and then behave accordingly (replace STF connection with connection into mesh).
-    deployment_mode: controller-mesh
+    qdr_deployment_mode: controller-mesh
     qdr_connectors:
       - host: stf-default-interconnect-5671-service-telemetry.apps-crc.testing
         port: 443
